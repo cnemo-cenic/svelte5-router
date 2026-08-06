@@ -6,8 +6,6 @@
 
   let { path = "", component, children, ...rest }: RouteProps = $props();
 
-  let routeParams = $state<RouteParams>({});
-
   const { registerRoute, unregisterRoute, activeRoute } = useRouter();
 
   const route = {
@@ -19,10 +17,14 @@
 
   const PropComponent = isAsync(component) ? component() : component;
 
-  $effect.pre(() => {
-    if ($activeRoute && $activeRoute.route === route) {
-      routeParams = $activeRoute.params;
+  let routeParams: RouteParams = $derived(
+    $activeRoute && $activeRoute.route === route
+      ? $activeRoute.params
+      : {}
+  );
 
+  $effect(() => {
+    if ($activeRoute && $activeRoute.route === route) {
       canUseDOM() && !$activeRoute.preserveScroll && window?.scrollTo(0, 0);
     }
   });
